@@ -165,8 +165,8 @@ sub wsp_fetch {
 		my @timeinfo = ($from_interval, $until_interval, $step);
 		my @values = (undef) x $points;
 		return { 
-			from => $from_interval, 
-			until => $until_interval,
+			start => $from_interval, 
+			end => $until_interval,
 			step => $step,
 			values => \@values,
 			cnt => scalar @values,
@@ -222,8 +222,8 @@ sub wsp_fetch {
 	close($file);
 
 	return {
-		from => $from_interval,
-		until => $until_interval,
+		start => $from_interval,
+		end => $until_interval,
 		step => $step,
 		values => $values,
 		cnt => scalar @$values,
@@ -326,8 +326,8 @@ Returns a hash refrence with data points and meta data for the given range:
 
 	{
 		'step' => 300,
-		'until' => 1374830700,
-		'from' => 1374830100,
+		'end' => 1374830700,
+		'start' => 1374830100,
 		'values' => [
 			'0.000000',
 			'1.000000'
