@@ -18,7 +18,7 @@ package Whisper;
 use strict;
 use warnings;
 
-our $VERSION = "1.0";
+our $VERSION;
 
 use base 'Exporter';
 our @EXPORT    = qw( wsp_info wsp_fetch );
