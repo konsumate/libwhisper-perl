@@ -1,0 +1,56 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use feature 'say';
+
+use Whisper;
+use Getopt::Long;
+use JSON;
+use Data::Dumper;
+
+my $params = {};
+GetOptions( \%$params, 'from=i', 'until=i', 'json' );
+
+my @commands = qw( info fetch );
+
+sub usage {
+	say "$0 <cmd> <file> [ --from <timestamp> ] [ --until <timestamp> ] [ --json ]";
+	say "	commands:	".join(", ",@commands);
+	exit 1;
+}
+
+my $cmd = shift || usage();
+my $wsp_file = shift || usage();
+
+unless( grep(/$cmd/, @commands )) {
+	usage();
+}
+
+unless( -e $wsp_file ) {
+	die("File $wsp_file does not exist\n");
+}
+
+if( $cmd eq "info" ) {
+	my $info = wsp_info($wsp_file);
+
+	if( $params->{json} ) {
+		say eval{ to_json($info) };
+	} else {
+		say Dumper($info);
+	}
+}
+elsif( $cmd eq "fetch" ) {
+
+	my $from = $params->{from};
+	my $until = $params->{until};
+	my $data = wsp_fetch($wsp_file, $from, $until);
+
+	if( $params->{json} ) {
+        say eval{ to_json($data) };
+    } else {
+        say Dumper($data);
+    }
+
+}
+
