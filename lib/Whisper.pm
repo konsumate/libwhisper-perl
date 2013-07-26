@@ -335,6 +335,10 @@ Returns a hash refrence with data points and meta data for the given range:
 		'cnt' => 2
 	};
 
+=head1 CVS
+
+Current CVS: L<https://github.com/corecache/libwhisper-perl>
+
 =head1 COPYRIGHT AND LICENSE
 
 Original Copyright 2008 Orbitz WorldWide (python)
