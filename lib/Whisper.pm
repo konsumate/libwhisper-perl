@@ -213,7 +213,7 @@ sub wsp_fetch {
 	while( @series_unpacked ) {
 		my ($point_time, $point_value ) = splice(@series_unpacked, 0, 2);
 		if( $point_time == $current_interval ) {
-			$values->[$index] = sprintf("%f", $point_value);
+			$values->[$index] = $point_value;
 		}
 		$current_interval += $step;
 		$index++;
