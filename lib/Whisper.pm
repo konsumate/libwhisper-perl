@@ -18,6 +18,8 @@ package Whisper;
 use strict;
 use warnings;
 
+use POSIX;
+
 our $VERSION;
 
 use base 'Exporter';
@@ -114,7 +116,7 @@ sub wsp_info {
 }
 
 sub wsp_fetch {
-	my ($dbfile, $from, $until) = @_;
+	my ($dbfile, $from, $until, $do_tuples, $date_format) = @_;
 
 	die("You need to specify a wsp file\n") unless $dbfile;
 	
@@ -217,6 +219,23 @@ sub wsp_fetch {
 		}
 		$current_interval += $step;
 		$index++;
+	}
+
+	# Generate datetime,data tuples
+	if( $do_tuples ) {
+
+		my $current = $from_interval;
+		while( my ($i, $val) = each @$values ) {
+
+			my $timestamp = $current;
+			# Format the datetime field if wanted
+			if( $date_format ) {
+				$timestamp = POSIX::strftime($date_format, localtime($current));
+			}
+
+			$values->[$i] = [ $timestamp, $val ];
+			$current += $step;
+		}
 	}
 
 	close($file);
