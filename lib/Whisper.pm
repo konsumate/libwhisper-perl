@@ -267,6 +267,12 @@ Whisper - Handle Whisper fixed-size database files
 	# Fetch archive data
 	my $data = wsp_fetch("/path/to/my/database.wsp", $from, $until);
 
+	# Fetch archive data in tuple form: [ [timestamp, data], [timestamp,data], ... ]
+	my $tuple_data = wsp_fetch("/path/to/my/database.wsp", $from, $until, 'true');
+	
+	# Same as fetch tuple data but with POSIX::strftime formatted datetime
+	my $formatted_tuple_data = wsp_fetch("/path/to/my/database.wsp", $from, $until, 'true', '%Y/%m/%d %H:%M:%S');
+
 
 =head1 DESCRIPTION
 
@@ -331,13 +337,15 @@ Returns a hash reference with Header/Metadata information:
 	};
 
 
-=head2 wsp_fetch ($file, $from, $until)
+=head2 wsp_fetch ($file, $from, $until, $do_tuple, $date_format)
 
 =head3 Parameters
 
 	path	Simple string file path	
 	from	epoch timestamp, defaults to oldest timepoint in archive
 	until	epoch timestamp, defaults to now
+	do_tuple	Returns the values in a tuple format: [ [timestamp, data], [timestamp,data], ... ]
+	date_format	Dictates the POSIX::strftime format for timestamps in tuples
 
 =head3 Returns
 
@@ -353,6 +361,32 @@ Returns a hash refrence with data points and meta data for the given range:
 		],
 		'cnt' => 2
 	};
+
+In combination with tuples, the values is an array of arrays with timestamp,data tuples:
+
+    {
+        'step' => 300,
+        'end' => 1374830700,
+        'start' => 1374830100,
+        'values' => [
+            [ 1374830100, '0.000000' ],
+            [ 1374830400, '1.000000' ]
+        ],
+        'cnt' => 2
+    };
+
+Or in combination with date-format .e.g: "%Y/%m/%d %H:%M"
+
+    {
+        'step' => 300,
+        'end' => 1374830700,
+        'start' => 1374830100,
+        'values' => [
+            [ '2013/07/26 11:15', '0.000000' ],
+            [ '2013/07/26 11:20', '1.000000' ]
+        ],
+        'cnt' => 2
+    };
 
 =head1 CVS
 
