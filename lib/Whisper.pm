@@ -236,6 +236,12 @@ sub wsp_fetch {
 			$values->[$i] = [ $timestamp, $val ];
 			$current += $step;
 		}
+
+		# Format start/end too
+		if( $date_format ) {
+			$from_interval = POSIX::strftime($date_format, localtime($from_interval));
+			$until_interval = POSIX::strftime($date_format, localtime($until_interval));
+		}
 	}
 
 	close($file);
