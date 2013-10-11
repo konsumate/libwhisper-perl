@@ -276,16 +276,31 @@ Whisper - Handle Whisper fixed-size database files
 	use Whisper;
 
 	# Read archive information
-	my $info = wsp_info("/path/to/my/database.wsp"); 
+	my $info = wsp_info( file => "/path/to/my/database.wsp"); 
 
 	# Fetch archive data
-	my $data = wsp_fetch("/path/to/my/database.wsp", $from, $until);
+	my $data = wsp_fetch( 
+		file => "/path/to/my/database.wsp",
+		from => $from,
+		until => $until
+	);
 
-	# Fetch archive data in tuple form: [ [timestamp, data], [timestamp,data], ... ]
-	my $tuple_data = wsp_fetch("/path/to/my/database.wsp", $from, $until, 'true');
+	# Fetch archive data in the tuples format: [ [timestamp, data], [timestamp,data], ... ]
+	my $tuple_data = wsp_fetch(
+		file => "/path/to/my/database.wsp",
+		from => $from,
+		until => $until,
+		format => 'tuples'
+	);
 	
 	# Same as fetch tuple data but with POSIX::strftime formatted datetime
-	my $formatted_tuple_data = wsp_fetch("/path/to/my/database.wsp", $from, $until, 'true', '%Y/%m/%d %H:%M:%S');
+	my $formatted_tuple_data = wsp_fetch(
+        file => "/path/to/my/database.wsp",
+        from => $from,
+        until => $until,
+        format => 'tuples'
+		date_format => '%Y/%m/%d %H:%M:%S'
+	);
 
 
 =head1 DESCRIPTION
@@ -315,7 +330,7 @@ By default, C<use Whisper> exports all the functions listed below.
 
 =head1 FUNCTIONS
 
-=head2 wsp_info ($file)
+=head2 wsp_info ( file => $file )
 
 =head3 Parameters
 
@@ -351,14 +366,14 @@ Returns a hash reference with Header/Metadata information:
 	};
 
 
-=head2 wsp_fetch ($file, $from, $until, $do_tuple, $date_format)
+=head2 wsp_fetch ( file => $file , from => $from, until => $until, format => $format, date_format => $dateformat )
 
 =head3 Parameters
 
 	path	Simple string file path	
 	from	epoch timestamp, defaults to oldest timepoint in archive
 	until	epoch timestamp, defaults to now
-	do_tuple	Returns the values in a tuple format: [ [timestamp, data], [timestamp,data], ... ]
+	format	'tuples' = returns the values in a tuple format: [ [timestamp, data], [timestamp,data], ... ]
 	date_format	Dictates the POSIX::strftime format for timestamps in tuples
 
 =head3 Returns
@@ -376,7 +391,7 @@ Returns a hash refrence with data points and meta data for the given range:
 		'cnt' => 2
 	};
 
-In combination with tuples, the values is an array of arrays with timestamp,data tuples:
+In combination with tuples format, the values is an array of arrays with timestamp,data tuples:
 
     {
         'step' => 300,
@@ -389,7 +404,7 @@ In combination with tuples, the values is an array of arrays with timestamp,data
         'cnt' => 2
     };
 
-Or in combination with date-format .e.g: "%Y/%m/%d %H:%M"
+Or in combination with date_format .e.g: "%Y/%m/%d %H:%M"
 
     {
         'step' => 300,
