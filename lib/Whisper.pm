@@ -101,7 +101,9 @@ sub __read_archiveinfo {
 }
 
 sub wsp_info {
-	my $dbfile = shift;
+	my %param = @_;
+
+	my $dbfile = $param{file};
 
 	die("You need to specify a wsp file\n") unless $dbfile;
 
@@ -116,7 +118,13 @@ sub wsp_info {
 }
 
 sub wsp_fetch {
-	my ($dbfile, $from, $until, $do_tuples, $date_format) = @_;
+	my %param = @_;
+
+	my $dbfile = $param{file};
+	my $from = $param{from};
+	my $until = $param{until};
+	my $do_tuples = $param{tuples};
+	my $date_format = $param{date_format};
 
 	die("You need to specify a wsp file\n") unless $dbfile;
 	

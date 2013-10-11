@@ -32,7 +32,7 @@ unless( -e $wsp_file ) {
 }
 
 if( $cmd eq "info" ) {
-	my $info = wsp_info($wsp_file);
+	my $info = wsp_info( file => $wsp_file );
 
 	if( $params->{json} ) {
 		say eval{ to_json($info) };
@@ -44,13 +44,19 @@ elsif( $cmd eq "fetch" ) {
 
 	my $from = $params->{from};
 	my $until = $params->{until};
-	my $data = wsp_fetch($wsp_file, $from, $until, $params->{tuples}, $params->{'date-format'});
+	my $data = wsp_fetch(
+		file => $wsp_file,
+		from => $from,
+		until => $until,
+		tuples => $params->{tuples},
+		date_format => $params->{'date-format'}
+	);
 
 	if( $params->{json} ) {
-        say eval{ to_json($data) };
-    } else {
-        say Dumper($data);
-    }
+		say eval{ to_json($data) };
+	} else {
+		say Dumper($data);
+	}
 
 }
 
