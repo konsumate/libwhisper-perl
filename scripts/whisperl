@@ -10,13 +10,15 @@ use JSON;
 use Data::Dumper;
 
 my $params = {};
-GetOptions( \%$params, 'from=i', 'until=i', 'json', 'tuples', 'date-format=s' );
+GetOptions( \%$params, 'from=i', 'until=i', 'json', 'format', 'date-format=s' );
 
 my @commands = qw( info fetch );
+my @formats = qw( tuples );
 
 sub usage {
-	say "$0 <cmd> <file> [ --from <timestamp> ] [ --until <timestamp> ] [ --json ] [ --tuples [ --date-format <strftime> ]]";
+	say "$0 <cmd> <file> [ --from <timestamp> ] [ --until <timestamp> ] [ --json ] [ --format <format> [ --date-format <strftime> ]]";
 	say "	commands:	".join(", ",@commands);
+	say "	formats:	".join(", ",@formats);
 	exit 1;
 }
 
@@ -48,7 +50,7 @@ elsif( $cmd eq "fetch" ) {
 		file => $wsp_file,
 		from => $from,
 		until => $until,
-		tuples => $params->{tuples},
+		format => $params->{format},
 		date_format => $params->{'date-format'}
 	);
 

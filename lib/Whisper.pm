@@ -123,7 +123,7 @@ sub wsp_fetch {
 	my $dbfile = $param{file};
 	my $from = $param{from};
 	my $until = $param{until};
-	my $do_tuples = $param{tuples};
+	my $format = $param{format};
 	my $date_format = $param{date_format};
 
 	die("You need to specify a wsp file\n") unless $dbfile;
@@ -230,7 +230,7 @@ sub wsp_fetch {
 	}
 
 	# Generate datetime,data tuples
-	if( $do_tuples ) {
+	if( $format eq 'tuples' ) {
 
 		my $current = $from_interval;
 		while( my ($i, $val) = each @$values ) {
