@@ -295,10 +295,10 @@ Whisper - Handle Whisper fixed-size database files
 	
 	# Same as fetch tuple data but with POSIX::strftime formatted datetime
 	my $formatted_tuple_data = wsp_fetch(
-        file => "/path/to/my/database.wsp",
-        from => $from,
-        until => $until,
-        format => 'tuples'
+		file => "/path/to/my/database.wsp",
+		from => $from,
+		until => $until,
+		format => 'tuples'
 		date_format => '%Y/%m/%d %H:%M:%S'
 	);
 
@@ -330,11 +330,11 @@ By default, C<use Whisper> exports all the functions listed below.
 
 =head1 FUNCTIONS
 
-=head2 wsp_info ( file => $file )
+=head2 wsp_info ( %parameters )
 
 =head3 Parameters
 
-	path    Simple string file path
+	file    String filepath towards a valid .wsp file
 
 =head3 Returns
 
@@ -366,15 +366,17 @@ Returns a hash reference with Header/Metadata information:
 	};
 
 
-=head2 wsp_fetch ( file => $file , from => $from, until => $until, format => $format, date_format => $dateformat )
+=head2 wsp_fetch ( %parameters )
 
 =head3 Parameters
 
-	path	Simple string file path	
-	from	epoch timestamp, defaults to oldest timepoint in archive
-	until	epoch timestamp, defaults to now
-	format	'tuples' = returns the values in a tuple format: [ [timestamp, data], [timestamp,data], ... ]
-	date_format	Dictates the POSIX::strftime format for timestamps in tuples
+	file		String filepath	towards a valid .wsp file
+	from		epoch timestamp, defaults to oldest timepoint in archive
+	until		epoch timestamp, defaults to now
+	format		Valid formats are:
+		tuples	returns the values in a tuple format: [ [timestamp1, data1], [timestamp2, data2], ... ]
+		split	returns an array for the timestamps and one for the data: [ [timestamp1, timestamp2], [data1, data2] ]
+	date_format	Dictates the POSIX::strftime format for timestamps in tuples, defaults to epoch timestamp: %s
 
 =head3 Returns
 
@@ -393,29 +395,29 @@ Returns a hash refrence with data points and meta data for the given range:
 
 In combination with tuples format, the values is an array of arrays with timestamp,data tuples:
 
-    {
-        'step' => 300,
-        'end' => 1374830700,
-        'start' => 1374830100,
-        'values' => [
-            [ 1374830100, '0.000000' ],
-            [ 1374830400, '1.000000' ]
-        ],
-        'cnt' => 2
-    };
+	{
+		'step' => 300,
+		'end' => 1374830700,
+		'start' => 1374830100,
+		'values' => [
+			[ 1374830100, '0.000000' ],
+			[ 1374830400, '1.000000' ]
+		],
+		'cnt' => 2
+	};
 
 Or in combination with date_format .e.g: "%Y/%m/%d %H:%M"
 
-    {
-        'step' => 300,
-        'end' => '2013/07/26 11:25',
-        'start' => '2013/07/26 11:15',
-        'values' => [
-            [ '2013/07/26 11:15', '0.000000' ],
-            [ '2013/07/26 11:20', '1.000000' ]
-        ],
-        'cnt' => 2
-    };
+	{
+		'step' => 300,
+		'end' => '2013/07/26 11:25',
+		'start' => '2013/07/26 11:15',
+		'values' => [
+			[ '2013/07/26 11:15', '0.000000' ],
+			[ '2013/07/26 11:20', '1.000000' ]
+		],
+		'cnt' => 2
+	};
 
 =head1 CVS
 
