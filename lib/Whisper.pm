@@ -14,9 +14,6 @@
 # limitations under the License.
 
 package Whisper;
-{
-  $Whisper::VERSION = '1.033';
-}
 
 use 5.012;
 
