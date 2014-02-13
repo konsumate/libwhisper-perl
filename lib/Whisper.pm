@@ -14,6 +14,9 @@
 # limitations under the License.
 
 package Whisper;
+{
+  $Whisper::VERSION = '1.033';
+}
 
 use strict;
 use warnings;
@@ -230,37 +233,51 @@ sub wsp_fetch {
 	}
 
 	# Generate datetime,data tuples
-	if( $format eq 'tuples' ) {
+	my $keys = [ (undef) x @$values ];
+	if( $format ) {
 
-		my $current = $from_interval;
-		while( my ($i, $val) = each @$values ) {
+			my $current = $from_interval;
+			while( my ($i, $val) = each @$values ) {
 
-			my $timestamp = $current;
-			# Format the datetime field if wanted
-			if( $date_format ) {
-				$timestamp = POSIX::strftime($date_format, localtime($current));
+				my $timestamp = $current;
+				# Format the datetime field if wanted
+				if( $date_format ) {
+					$timestamp = POSIX::strftime($date_format, localtime($current));
+				}
+
+				if( $format eq 'tuples' ) {
+					$values->[$i] = [ $timestamp, $val ];
+				} 
+				if( $format eq "split" ) {
+					$keys->[$i] = $timestamp;
+				}
+
+				$current += $step;
 			}
 
-			$values->[$i] = [ $timestamp, $val ];
-			$current += $step;
-		}
+			# Format start/end too
+			if( $date_format ) {
+				$from_interval = POSIX::strftime($date_format, localtime($from_interval));
+				$until_interval = POSIX::strftime($date_format, localtime($until_interval));
+			}
 
-		# Format start/end too
-		if( $date_format ) {
-			$from_interval = POSIX::strftime($date_format, localtime($from_interval));
-			$until_interval = POSIX::strftime($date_format, localtime($until_interval));
-		}
 	}
 
 	close($file);
 
-	return {
+	my $resp = {
 		start => $from_interval,
 		end => $until_interval,
 		step => $step,
 		values => $values,
 		cnt => scalar @$values,
+	};
+
+	if( $format eq "split" ) {
+		$resp->{keys} = $keys;
 	}
+
+	return $resp;
 } 
      
 1;
@@ -285,15 +302,25 @@ Whisper - Handle Whisper fixed-size database files
 		until => $until
 	);
 
-	# Fetch archive data in the tuples format: [ [timestamp, data], [timestamp,data], ... ]
+	# Fetch archive data in the tuples format: 
+	# { values => [ [timestamp, data], [timestamp,data], ... ] }
 	my $tuple_data = wsp_fetch(
 		file => "/path/to/my/database.wsp",
 		from => $from,
 		until => $until,
 		format => 'tuples'
 	);
+
+	# Fetch archive data in the split format: 
+	# { keys => [timestamp1, timestamp2], values => [data1, data2] }
+    my $split_data = wsp_fetch(
+        file => "/path/to/my/database.wsp",
+        from => $from,
+        until => $until,
+        format => 'tuples'
+    );
 	
-	# Same as fetch tuple data but with POSIX::strftime formatted datetime
+	# Same as fetch tuple/split data but with POSIX::strftime formatted datetime
 	my $formatted_tuple_data = wsp_fetch(
 		file => "/path/to/my/database.wsp",
 		from => $from,
@@ -370,13 +397,13 @@ Returns a hash reference with Header/Metadata information:
 
 =head3 Parameters
 
-	file		String filepath	towards a valid .wsp file
-	from		epoch timestamp, defaults to oldest timepoint in archive
-	until		epoch timestamp, defaults to now
-	format		Valid formats are:
-		tuples	returns the values in a tuple format: [ [timestamp1, data1], [timestamp2, data2], ... ]
-		split	returns an array for the timestamps and one for the data: [ [timestamp1, timestamp2], [data1, data2] ]
-	date_format	Dictates the POSIX::strftime format for timestamps in tuples, defaults to epoch timestamp: %s
+ - file		String filepath	towards a valid .wsp file
+ - from		epoch timestamp, defaults to oldest timepoint in archive
+ - until		epoch timestamp, defaults to now
+ - format		Valid formats are:
+    - tuples	returns the values in a tuple format: [ [timestamp1, data1], [timestamp2, data2], ... ]
+    - split	returns an array for the timestamps in 'keys' and one for the data in 'values': { keys => [timestamp1, timestamp2], values => [data1, data2] }
+ - date_format	Dictates the POSIX::strftime format for timestamps in tuples, defaults to epoch timestamp: %s
 
 =head3 Returns
 
@@ -405,6 +432,23 @@ In combination with tuples format, the values is an array of arrays with timesta
 		],
 		'cnt' => 2
 	};
+
+In combination with split format, the values are accessible under 'values' and timestamps under 'keys'
+
+    {
+        'step' => 300,
+        'end' => 1374830700,
+        'start' => 1374830100,
+        'values' => [
+            '0.000000',
+            '1.000000'
+        ],
+		'keys' => [
+			1374830100,
+			1374830400
+		],
+        'cnt' => 2
+    };
 
 Or in combination with date_format .e.g: "%Y/%m/%d %H:%M"
 
