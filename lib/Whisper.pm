@@ -275,7 +275,7 @@ sub wsp_fetch {
 		cnt => scalar @$values,
 	};
 
-	if( $format eq "split" ) {
+	if( $format && $format eq "split" ) {
 		$resp->{keys} = $keys;
 	}
 
