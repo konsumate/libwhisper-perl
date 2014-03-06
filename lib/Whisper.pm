@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#   http://www.apache.org/licenses/LICENSE-2.0
+#	http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,12 +33,12 @@ our @EXPORT    = qw( wsp_info wsp_fetch );
 # Here is the basic layout of a whisper data file .wsp:
 #
 # File = Header,Data
-#       Header = Metadata,ArchiveInfo+
-#               Metadata = aggregationType,maxRetention,xFilesFactor,archiveCount
-#               ArchiveInfo = Offset,SecondsPerPoint,Points
-#       Data = Archive+
-#               Archive = Point+
-#                       Point = timestamp,value
+#		Header = Metadata,ArchiveInfo+
+#				Metadata = aggregationType,maxRetention,xFilesFactor,archiveCount
+#				ArchiveInfo = Offset,SecondsPerPoint,Points
+#		Data = Archive+
+#				Archive = Point+
+#						Point = timestamp,value
 
 my $metadata_Format = "N2f>N";
 my $metadata_Size = length pack($metadata_Format, 0);
@@ -74,7 +74,7 @@ sub __read_header {
 	
 	my $archives = [];
 	foreach(0..$archiveCount-1) {
-        push(@$archives, __read_archiveinfo($file));
+		push(@$archives, __read_archiveinfo($file));
 	}
 
 	return {
@@ -110,7 +110,7 @@ sub wsp_info {
 	die("You need to specify a wsp file\n") unless $dbfile;
 
 	open(my $file, "<", $dbfile) or die("Unable to read whisper file: $dbfile\n");
-	binmode($file); 
+	binmode($file);
 
 	my $header = __read_header($file);
 	$header->{fileSize} = (stat($file))[7];
@@ -277,8 +277,8 @@ sub wsp_fetch {
 	}
 
 	return $resp;
-} 
-     
+}
+	 
 1;
 
 __END__
@@ -312,12 +312,12 @@ Whisper - Handle Whisper fixed-size database files
 
 	# Fetch archive data in the split format: 
 	# { keys => [timestamp1, timestamp2], values => [data1, data2] }
-    my $split_data = wsp_fetch(
-        file => "/path/to/my/database.wsp",
-        from => $from,
-        until => $until,
-        format => 'tuples'
-    );
+	my $split_data = wsp_fetch(
+		file => "/path/to/my/database.wsp",
+		from => $from,
+		until => $until,
+		format => 'tuples'
+	);
 	
 	# Same as fetch tuple/split data but with POSIX::strftime formatted datetime
 	my $formatted_tuple_data = wsp_fetch(
@@ -352,7 +352,7 @@ Feel free to help implement the above operations.
  
 =head1 EXPORTS
  
-By default, C<use Whisper> exports all the functions listed below.  
+By default, C<use Whisper> exports all the functions listed below.
 
 =head1 FUNCTIONS
 
@@ -360,7 +360,7 @@ By default, C<use Whisper> exports all the functions listed below.
 
 =head3 Parameters
 
-	file    String filepath towards a valid .wsp file
+	file	String filepath towards a valid .wsp file
 
 =head3 Returns
 
@@ -400,8 +400,8 @@ Returns a hash reference with Header/Metadata information:
  - from		epoch timestamp, defaults to oldest timepoint in archive
  - until		epoch timestamp, defaults to now
  - format		Valid formats are:
-    - tuples	returns the values in a tuple format: [ [timestamp1, data1], [timestamp2, data2], ... ]
-    - split	returns an array for the timestamps in 'keys' and one for the data in 'values': { keys => [timestamp1, timestamp2], values => [data1, data2] }
+	- tuples	returns the values in a tuple format: [ [timestamp1, data1], [timestamp2, data2], ... ]
+	- split	returns an array for the timestamps in 'keys' and one for the data in 'values': { keys => [timestamp1, timestamp2], values => [data1, data2] }
  - date_format	Dictates the POSIX::strftime format for timestamps in tuples, defaults to epoch timestamp: %s
 
 =head3 Returns
@@ -434,20 +434,20 @@ In combination with tuples format, the values is an array of arrays with timesta
 
 In combination with split format, the values are accessible under 'values' and timestamps under 'keys'
 
-    {
-        'step' => 300,
-        'end' => 1374830700,
-        'start' => 1374830100,
-        'values' => [
-            '0.000000',
-            '1.000000'
-        ],
+	{
+		'step' => 300,
+		'end' => 1374830700,
+		'start' => 1374830100,
+		'values' => [
+			'0.000000',
+			'1.000000'
+		],
 		'keys' => [
 			1374830100,
 			1374830400
 		],
-        'cnt' => 2
-    };
+		'cnt' => 2
+	};
 
 Or in combination with date_format .e.g: "%Y/%m/%d %H:%M"
 
