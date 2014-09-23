@@ -25,7 +25,7 @@ use POSIX;
 our $VERSION;
 
 use base 'Exporter';
-our @EXPORT    = qw( wsp_info wsp_fetch );
+our @EXPORT    = qw( wsp_info wsp_fetch wsp_dump );
 
 # ABSTRACT: Handle Whisper fixed-size database files
  
@@ -278,6 +278,87 @@ sub wsp_fetch {
 
 	return $resp;
 }
+
+sub wsp_dump {
+  my %param = @_;
+
+  my $dbfile = $param{file};
+  my $format = $param{format};
+  my $date_format = $param{date_format};
+
+  die("You need to specify a wsp file\n") unless $dbfile;
+
+  open(my $file, "<", $dbfile) or die("Unable to read whisper file: $dbfile\n");
+  binmode($file); 
+
+  my $header = __read_header($file);
+
+  my $responses = [];
+  my $archive_index = 0;
+  foreach my $archive (@{ $header->{archives} }) {
+    my $series;
+    seek($file, $archive->{offset}, 0);
+    read($file, $series, $archive->{size}) || die("unable to read archive number $archive_index from file [$dbfile]: $!");
+    close($file);
+
+    my $min_time = 0;
+    my $max_time = 0;
+
+    my $points = length($series) / $point_Size;
+    my $series_format = $point_Format x $points;
+    my @series_unpacked = unpack($series_format, $series);
+    
+    my $keys = [ (undef) x $points ];
+    my $values = [ (undef) x $points ];
+
+    my $point_index = 0;
+    while( @series_unpacked ) {
+      my ($point_time, $point_value) = splice(@series_unpacked, 0, 2);
+      $values->[$point_index] = $point_value;
+
+      if ($point_time) {
+          if ($min_time == 0 || $min_time > $point_time) {
+              $min_time = $point_time;
+          }
+          if ($max_time == 0 || $max_time < $point_time) {
+              $max_time = $point_time;
+          }
+      }
+
+      if( $date_format ) {
+        $point_time = POSIX::strftime($date_format, localtime($point_time));
+      }
+
+      if($format && $format eq 'tuples' ) {
+        $values->[$point_index] = [ $point_time, $point_value ];
+      } 
+      if($format && $format eq "split" ) {
+        $keys->[$point_index] = $point_time;
+      }
+
+      $point_index++;
+    }
+
+    my $resp = {
+      start => $min_time,
+      end => $max_time,
+      step => $archive->{secondsPerPoint},
+      values => $values,
+      cnt => scalar @$values,
+    };
+
+    if( $format && $format eq "split" ) {
+      $resp->{keys} = $keys;
+    }
+
+    $responses->[$archive_index] = $resp;
+
+    $archive_index++;
+  }
+
+  return $responses;
+}
+
 	 
 1;
 
@@ -340,6 +421,7 @@ The following operations are supported:
 
 	wsp_info	Read basic archive information
 	wsp_fetch	Fetch data points from archive
+	wsp_dump Fetch all the archive(s) data
 
 These operations are planned:
 
@@ -461,6 +543,21 @@ Or in combination with date_format .e.g: "%Y/%m/%d %H:%M"
 		],
 		'cnt' => 2
 	};
+
+
+=head2 wsp_dump ( %parameters )
+
+=head3 Parameters
+
+ - file		String filepath	towards a valid .wsp file
+ - format		Valid formats are:
+	- tuples	returns the values in a tuple format: [ [timestamp1, data1], [timestamp2, data2], ... ]
+	- split	returns an array for the timestamps in 'keys' and one for the data in 'values': { keys => [timestamp1, timestamp2], values => [data1, data2] }
+ - date_format	Dictates the POSIX::strftime format for timestamps in tuples, defaults to epoch timestamp: %s
+
+=head3 Returns
+
+Returns the array of response structures as returned by wsp_fetch()
 
 =head1 CVS
 
