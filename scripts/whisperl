@@ -12,7 +12,7 @@ use Data::Dumper;
 my $params = {};
 GetOptions( \%$params, 'from=i', 'until=i', 'json', 'format', 'date-format=s' );
 
-my @commands = qw( info fetch );
+my @commands = qw( info fetch dump );
 my @formats = qw( tuples );
 
 sub usage {
@@ -61,4 +61,17 @@ elsif( $cmd eq "fetch" ) {
 	}
 
 }
+elsif( $cmd eq "dump" ) {
+	my $data = wsp_dump(
+		file => $wsp_file,
+		format => $params->{format},
+		date_format => $params->{'date-format'}
+	);
 
+	if( $params->{json} ) {
+		say eval{ to_json($data) };
+	} else {
+		say Dumper($data);
+	}
+
+}
